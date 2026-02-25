@@ -8,6 +8,8 @@ class WhatsAppService {
     this.client = null;
     this.state = "not_initialized";
     this.lastQr = null;
+    this.lastQrAscii = null;
+    this.lastQrAt = null;
     this.lastError = null;
     this.initialized = false;
   }
@@ -29,14 +31,20 @@ class WhatsAppService {
     this.client.on("qr", (qr) => {
       this.state = "qr_pending";
       this.lastQr = qr;
+      this.lastQrAt = new Date().toISOString();
       this.lastError = null;
       console.log("\n[WhatsApp] Escaneie o QR Code no celular:");
-      qrcodeTerminal.generate(qr, { small: true });
+      qrcodeTerminal.generate(qr, { small: true }, (ascii) => {
+        this.lastQrAscii = ascii || null;
+        if (ascii) console.log(ascii);
+      });
     });
 
     this.client.on("authenticated", () => {
       this.state = "authenticated";
       this.lastQr = null;
+      this.lastQrAscii = null;
+      this.lastQrAt = null;
       console.log("[WhatsApp] Sessao autenticada.");
     });
 
@@ -44,6 +52,8 @@ class WhatsAppService {
       this.state = "ready";
       this.lastError = null;
       this.lastQr = null;
+      this.lastQrAscii = null;
+      this.lastQrAt = null;
       console.log("[WhatsApp] Cliente conectado e pronto.");
     });
 
@@ -72,6 +82,8 @@ class WhatsAppService {
       initialized: this.initialized,
       state: this.state,
       hasQr: Boolean(this.lastQr),
+      qrAscii: this.lastQrAscii,
+      lastQrAt: this.lastQrAt,
       lastError: this.lastError
     };
   }

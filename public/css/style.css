@@ -342,6 +342,20 @@ tr:last-child td { border-bottom: 0; }
   font-size: 0.9rem;
 }
 
+.qr-ascii {
+  margin: 8px 0 0;
+  padding: 12px;
+  background: #fff;
+  color: #000;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+  white-space: pre;
+  line-height: 1;
+  font-size: 8px;
+  font-family: Consolas, "Courier New", monospace;
+}
+
 .table-pre {
   margin: 0;
   max-width: 420px;

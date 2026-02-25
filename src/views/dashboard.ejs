@@ -24,7 +24,8 @@
     <ul class="info-list">
       <li><strong>Estado:</strong> <code><%= whatsappStatus.state %></code></li>
       <li><strong>Inicializado:</strong> <%= whatsappStatus.initialized ? 'Sim' : 'Nao' %></li>
-      <li><strong>QR pendente:</strong> <%= whatsappStatus.hasQr ? 'Sim (veja terminal)' : 'Nao' %></li>
+      <li><strong>QR pendente:</strong> <%= whatsappStatus.hasQr ? 'Sim (veja abaixo)' : 'Nao' %></li>
+      <li><strong>QR gerado em:</strong> <%= whatsappStatus.lastQrAt || '-' %></li>
       <li><strong>Erro:</strong> <%= whatsappStatus.lastError || '-' %></li>
       <li><strong>Data local:</strong> <code><%= todayIso %></code></li>
       <li><strong>Cron:</strong> <code><%= config.cronSchedule %></code></li>
@@ -52,6 +53,12 @@
       </form>
       <a class="btn btn-outline" href="/grupos">Listar grupos</a>
     </div>
+    <% if (whatsappStatus.hasQr && whatsappStatus.qrAscii) { %>
+      <hr />
+      <h4>QR Code WhatsApp (escaneie pelo celular)</h4>
+      <p class="hint">Se ficar pequeno, use zoom do navegador em 80% ou abra a pagina em tela cheia.</p>
+      <pre class="qr-ascii"><%= whatsappStatus.qrAscii %></pre>
+    <% } %>
   </div>
 
   <div class="card">
