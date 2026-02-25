@@ -1,0 +1,149 @@
+<%- include("partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="grid cards-3">
+  <div class="card">
+    <h3>Aniversariantes</h3>
+    <p class="metric"><%= stats.totalAniversariantes %></p>
+    <a class="btn btn-outline" href="/aniversariantes">Abrir lista</a>
+  </div>
+  <div class="card">
+    <h3>Templates</h3>
+    <p class="metric"><%= stats.totalTemplates %></p>
+    <a class="btn btn-outline" href="/templates">Gerenciar</a>
+  </div>
+  <div class="card">
+    <h3>Envios hoje</h3>
+    <p class="metric"><%= stats.enviosHoje %></p>
+    <a class="btn btn-outline" href="/logs">Ver logs</a>
+  </div>
+</section>
+
+<section class="grid cards-2">
+  <div class="card">
+    <h3>Status WhatsApp</h3>
+    <ul class="info-list">
+      <li><strong>Estado:</strong> <code><%= whatsappStatus.state %></code></li>
+      <li><strong>Inicializado:</strong> <%= whatsappStatus.initialized ? 'Sim' : 'Nao' %></li>
+      <li><strong>QR pendente:</strong> <%= whatsappStatus.hasQr ? 'Sim (veja terminal)' : 'Nao' %></li>
+      <li><strong>Erro:</strong> <%= whatsappStatus.lastError || '-' %></li>
+      <li><strong>Data local:</strong> <code><%= todayIso %></code></li>
+      <li><strong>Cron:</strong> <code><%= config.cronSchedule %></code></li>
+      <li><strong>Timezone:</strong> <code><%= config.timezone %></code></li>
+      <li><strong>Sessao (max):</strong> <code><%= config.panelSessionMaxAgeSec %>s</code></li>
+      <li><strong>Sessao (inatividade):</strong> <code><%= config.panelSessionIdleTimeoutSec %>s</code></li>
+      <li><strong>Bloqueio login (falhas/IP):</strong> <code><%= config.panelLoginMaxFailuresPerIp %></code></li>
+      <li><strong>Bloqueio login (duracao):</strong> <code><%= config.panelLoginLockoutSec %>s</code></li>
+      <li><strong>Allowlist IP:</strong> <%= config.panelIpAllowlistEnabled ? 'Ativa' : 'Desativada' %></li>
+      <li><strong>Lembretes antes:</strong> <code><%= (config.reminderDaysBefore || []).join(', ') || '-' %> dias</code></li>
+    </ul>
+    <div class="actions-row">
+      <form method="post" action="/executar-agora">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" class="btn">Executar verificacao agora</button>
+      </form>
+      <form method="post" action="/executar-lembretes-agora">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" class="btn btn-outline">Rodar lembretes agora</button>
+      </form>
+      <form method="post" action="/executar-lembretes-agora">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="ignore_duplicate" value="1" />
+        <button type="submit" class="btn btn-outline">Rodar lembretes (teste)</button>
+      </form>
+      <a class="btn btn-outline" href="/grupos">Listar grupos</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Envio Manual de Teste</h3>
+    <p class="hint">Usa o template ativo e envia para o grupo configurado no <code>.env</code>.</p>
+    <form method="post" action="/enviar-teste" class="stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <label for="nome_teste">Nome para placeholder {nome}</label>
+      <input id="nome_teste" name="nome_teste" type="text" value="Teste SDJ" maxlength="80" />
+      <button type="submit" class="btn">Enviar teste</button>
+    </form>
+    <hr />
+    <h4>Lembrete Antecipado (Teste)</h4>
+    <p class="hint">Usa o template ativo de lembrete e envia para o grupo configurado.</p>
+    <form method="post" action="/enviar-lembrete-teste" class="stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <label for="dias_lembrete">Dias antes</label>
+      <select id="dias_lembrete" name="dias_lembrete">
+        <% (config.reminderDaysBefore || [7,3,1]).forEach(function(d) { %>
+          <option value="<%= d %>"><%= d %> dias</option>
+        <% }) %>
+      </select>
+      <label for="nome_teste_lembrete">Nome para placeholder {nome}</label>
+      <input id="nome_teste_lembrete" name="nome_teste" type="text" value="Teste SDJ" maxlength="80" />
+      <button type="submit" class="btn btn-outline">Enviar lembrete de teste</button>
+    </form>
+    <div class="actions-row" style="margin-top:10px;">
+      <form method="post" action="/enviar-lembrete-proximo-teste">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" class="btn btn-outline">Teste do proximo aniversariante</button>
+      </form>
+    </div>
+    <p class="hint">Esse teste escolhe automaticamente o aniversariante ativo mais proximo e envia com os dias exatos (ex.: D-5).</p>
+    <hr />
+    <h4>Resumo Mensal</h4>
+    <p class="hint">Envia a tabela de aniversariantes ativos do mes atual para o grupo configurado.</p>
+    <form method="post" action="/enviar-resumo-mensal-teste">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <button type="submit" class="btn btn-outline">Enviar resumo do mes atual</button>
+    </form>
+    <hr />
+    <h4>Templates ativos</h4>
+    <p class="hint"><strong>Hoje:</strong> <%= activeTemplates.birthdayToday ? activeTemplates.birthdayToday.nome : 'Nenhum' %></p>
+    <% if (activeTemplates.birthdayToday) { %>
+      <pre class="template-preview"><%= activeTemplates.birthdayToday.conteudo %></pre>
+    <% } %>
+    <p class="hint"><strong>Lembrete:</strong> <%= activeTemplates.birthdayReminder ? activeTemplates.birthdayReminder.nome : 'Nenhum' %></p>
+    <% if (activeTemplates.birthdayReminder) { %>
+      <pre class="template-preview"><%= activeTemplates.birthdayReminder.conteudo %></pre>
+    <% } %>
+    <p class="hint"><strong>Lembrete D-1:</strong> <%= activeTemplates.birthdayReminderD1 ? activeTemplates.birthdayReminderD1.nome : 'Nenhum (usa template de lembrete)' %></p>
+    <% if (activeTemplates.birthdayReminderD1) { %>
+      <pre class="template-preview"><%= activeTemplates.birthdayReminderD1.conteudo %></pre>
+    <% } %>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <div>
+      <h3>Previa de Lembretes de Hoje</h3>
+      <p class="hint">Mostra quem recebera lembrete hoje e quantos dias faltam exatamente.</p>
+    </div>
+    <div class="badge badge-subtle"><%= reminderPreview.totalFound %> encontrados</div>
+  </div>
+
+  <% if (!reminderPreview.matches || !reminderPreview.matches.length) { %>
+    <p>Nenhum lembrete antecipado para hoje.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Faltam</th>
+            <th>Aniversario</th>
+            <th>Observacao</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% reminderPreview.matches.forEach(function(item) { %>
+            <tr>
+              <td><strong><%= item.person.nome %></strong></td>
+              <td><code>D-<%= item.daysBefore %></code> (<%= item.daysBefore %> dias)</td>
+              <td><%= item.birthdayDateBr %></td>
+              <td><%= item.person.observacao || '-' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include("partials/footer") %>

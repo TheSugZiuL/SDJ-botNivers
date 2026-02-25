@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | <%= appName %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <main class="login-page">
+    <section class="login-panel card form-card">
+      <div class="login-brand">
+        <img src="/images/sdj-semfundo.png" alt="SDJ - Grupo Sou de Jesus" class="login-logo" />
+        <h1>Bot-SDJ-Nivers</h1>
+        <p class="hint">Painel administrativo restrito</p>
+      </div>
+
+      <h2 class="login-title">Login</h2>
+
+      <% if (typeof error === 'string' && error) { %>
+        <div class="alert error"><%= error %></div>
+      <% } %>
+
+      <% if (typeof flashErr === 'string' && flashErr) { %>
+        <div class="alert error"><%= flashErr %></div>
+      <% } %>
+
+      <form method="post" action="/login" class="stack-form login-form" autocomplete="off">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="next" value="<%= typeof nextUrl === 'string' ? nextUrl : '' %>" />
+
+        <label for="username">Usuario</label>
+        <input id="username" name="username" type="text" required maxlength="120" autofocus autocapitalize="none" />
+
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" required maxlength="200" />
+
+        <button type="submit" class="btn login-submit">Entrar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

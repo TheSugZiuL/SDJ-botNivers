@@ -1,0 +1,43 @@
+<%- include("../partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="card form-card">
+  <h3><%= formMode === 'edit' ? 'Editar' : 'Novo' %> Aniversariante</h3>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert error">
+      <ul class="error-list">
+        <% errors.forEach(function(err) { %>
+          <li><%= err %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form method="post" action="<%= formMode === 'edit' ? '/aniversariantes/' + item.id : '/aniversariantes' %>" class="stack-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <label for="nome">Nome *</label>
+    <input id="nome" name="nome" type="text" required maxlength="100" value="<%= item.nome || '' %>" />
+
+    <label for="data_aniversario">Data de aniversario *</label>
+    <input id="data_aniversario" name="data_aniversario" type="text" required placeholder="DD/MM" pattern="\d{2}/\d{2}" maxlength="5" value="<%= formatDateBr(item.data_aniversario) === '-' ? '' : formatDateBr(item.data_aniversario) %>" />
+    <p class="hint">Use apenas dia e mes no formato DD/MM (ex.: 04/01).</p>
+
+    <label for="observacao">Observacao</label>
+    <textarea id="observacao" name="observacao" rows="3" maxlength="250"><%= item.observacao || '' %></textarea>
+
+    <label for="foto_url">Link da foto (Google Photos / URL)</label>
+    <input id="foto_url" name="foto_url" type="url" maxlength="500" value="<%= item.foto_url || '' %>" />
+
+    <label class="checkbox-row">
+      <input type="checkbox" name="ativo" <%= Number(item.ativo) ? 'checked' : '' %> />
+      Ativo
+    </label>
+
+    <div class="actions-row">
+      <button type="submit" class="btn">Salvar</button>
+      <a class="btn btn-outline" href="/aniversariantes">Cancelar</a>
+    </div>
+  </form>
+</section>
+
+<%- include("../partials/footer") %>

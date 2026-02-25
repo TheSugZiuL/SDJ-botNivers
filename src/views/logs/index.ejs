@@ -1,0 +1,39 @@
+<%- include("../partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="card">
+  <h3>Logs de Envio</h3>
+  <p class="hint">Ajuda a auditar envios e evitar duplicidade.</p>
+
+  <% if (!items.length) { %>
+    <p>Nenhum log encontrado.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data envio</th>
+            <th>Aniversariante</th>
+            <th>Status</th>
+            <th>Erro</th>
+            <th>Mensagem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(function(item) { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><%= item.data_envio %></td>
+              <td><%= item.aniversariante_nome || 'Teste manual' %></td>
+              <td><span class="badge <%= item.status === 'sucesso' ? 'badge-success' : 'badge-error' %>"><%= item.status %></span></td>
+              <td><%= item.erro || '-' %></td>
+              <td><pre class="table-pre"><%= item.mensagem_enviada %></pre></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

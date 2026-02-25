@@ -1,0 +1,35 @@
+<%- include("../partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="card">
+  <h3>Grupos do WhatsApp</h3>
+  <p class="hint">Depois de conectar o WhatsApp, copie um ID para o <code>GROUP_ID</code> no arquivo <code>.env</code>.</p>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <% if (!groups.length) { %>
+    <p>Nenhum grupo listado no momento.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome do grupo</th>
+            <th>ID (copiar)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% groups.forEach(function(group) { %>
+            <tr>
+              <td><strong><%= group.nome %></strong></td>
+              <td><code><%= group.id %></code></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

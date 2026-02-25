@@ -1,0 +1,58 @@
+<%- include("../partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="card">
+  <div class="section-head">
+    <div>
+      <h3>Lista de Aniversariantes</h3>
+      <p class="hint">Cadastre pessoas e marque como ativas para envio automatico.</p>
+    </div>
+    <a class="btn" href="/aniversariantes/novo">Novo</a>
+  </div>
+
+  <% if (!items.length) { %>
+    <p>Nenhum aniversariante cadastrado.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Data</th>
+            <th>Ativo</th>
+            <th>Observacao</th>
+            <th>Foto</th>
+            <th>Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(function(item) { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><strong><%= item.nome %></strong></td>
+              <td><%= formatDateBr(item.data_aniversario) %></td>
+              <td><%= item.ativo ? 'Sim' : 'Nao' %></td>
+              <td><%= item.observacao || '-' %></td>
+              <td>
+                <% if (item.foto_url) { %>
+                  <a href="<%= item.foto_url %>" target="_blank" rel="noopener noreferrer">Abrir</a>
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+              <td class="actions-cell">
+                <a class="btn btn-sm btn-outline" href="/aniversariantes/<%= item.id %>/editar">Editar</a>
+                <form method="post" action="/aniversariantes/<%= item.id %>/excluir" onsubmit="return confirm('Excluir cadastro?');">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

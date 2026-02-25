@@ -1,0 +1,49 @@
+<%- include("../partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="card">
+  <div class="section-head">
+    <div>
+      <h3>Templates de Mensagem</h3>
+      <p class="hint">Placeholders: <code>{nome}</code>, <code>{observacao}</code>, <code>{dia}</code>, <code>{mes}</code>, <code>{dias_faltam}</code>.</p>
+    </div>
+    <a class="btn" href="/templates/novo">Novo template</a>
+  </div>
+
+  <% if (!items.length) { %>
+    <p>Nenhum template cadastrado.</p>
+  <% } else { %>
+    <div class="template-list">
+      <% items.forEach(function(item) { %>
+        <article class="template-card <%= item.ativo ? 'template-active' : '' %>">
+          <div class="template-head">
+            <h4><%= item.nome %></h4>
+            <div class="actions-row">
+              <span class="badge badge-subtle">
+                <%= item.tipo === 'birthday_reminder_d1' ? 'Lembrete D-1' : (item.tipo === 'birthday_reminder' ? 'Lembrete' : 'Hoje') %>
+              </span>
+              <% if (item.ativo) { %><span class="badge">Ativo</span><% } %>
+            </div>
+          </div>
+
+          <pre class="template-preview"><%= item.conteudo %></pre>
+
+          <div class="actions-row">
+            <a class="btn btn-sm btn-outline" href="/templates/<%= item.id %>/editar">Editar</a>
+            <% if (!item.ativo) { %>
+              <form method="post" action="/templates/<%= item.id %>/ativar">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button type="submit" class="btn btn-sm">Ativar</button>
+              </form>
+            <% } %>
+            <form method="post" action="/templates/<%= item.id %>/excluir" onsubmit="return confirm('Excluir template?');">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+            </form>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

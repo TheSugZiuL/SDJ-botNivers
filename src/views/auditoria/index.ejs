@@ -1,0 +1,48 @@
+<%- include("../partials/header", { pageTitle, currentPath, flashOk, flashErr }) %>
+
+<section class="card">
+  <h3>Auditoria de Usuario</h3>
+  <p class="hint">Registra login/logout e acoes executadas no painel.</p>
+
+  <% if (!items.length) { %>
+    <p>Nenhum evento de auditoria registrado.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Usuario</th>
+            <th>Acao</th>
+            <th>Descricao</th>
+            <th>Origem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(function(item) { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><%= item.created_at %></td>
+              <td><code><%= item.username %></code></td>
+              <td><code><%= item.action %></code></td>
+              <td><%= item.description %></td>
+              <td>
+                <div><code><%= item.method %></code> <code><%= item.path %></code></div>
+                <div class="hint">IP: <code><%= item.ip || '-' %></code></div>
+                <% if (item.details) { %>
+                  <details>
+                    <summary>Detalhes</summary>
+                    <pre class="table-pre"><%= item.details %></pre>
+                  </details>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

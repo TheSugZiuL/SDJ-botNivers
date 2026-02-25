@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: bot-sdj-nivers
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /login
+    autoDeploy: true
+    disk:
+      name: bot-sdj-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: REQUIRE_HTTPS
+        value: "true"
+      - key: TZ
+        value: America/Sao_Paulo
+      - key: DB_PATH
+        value: /var/data/bot_sdj_nivers.db
+      - key: WHATSAPP_AUTH_PATH
+        value: /var/data/whatsapp-auth
+      - key: PANEL_BASIC_AUTH_ENABLED
+        value: "true"
+      - key: PANEL_LOGIN_USER
+        sync: false
+      - key: PANEL_LOGIN_PASSWORD
+        sync: false
+      - key: PANEL_SESSION_SECRET
+        generateValue: true
+      - key: PANEL_SESSION_MAX_AGE_SEC
+        value: "43200"
+      - key: PANEL_SESSION_IDLE_TIMEOUT_SEC
+        value: "1800"
+      - key: PANEL_LOGIN_MAX_FAILURES_PER_IP
+        value: "5"
+      - key: PANEL_LOGIN_FAILURE_WINDOW_SEC
+        value: "900"
+      - key: PANEL_LOGIN_LOCKOUT_SEC
+        value: "1800"
+      - key: PANEL_IP_ALLOWLIST
+        sync: false
+      - key: GROUP_ID
+        sync: false
+      - key: CRON_SCHEDULE
+        value: "0 8 * * *"

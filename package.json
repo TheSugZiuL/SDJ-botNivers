@@ -1,0 +1,25 @@
+{
+  "name": "bot-sdj-nivers",
+  "version": "1.0.0",
+  "description": "Bot de WhatsApp para avisar aniversarios em grupo com painel web e SQLite",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:init": "node src/scripts/init-db.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.27.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

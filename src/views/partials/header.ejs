@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageTitle ? pageTitle + " | " : "" %><%= appName %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/images/sdj-semfundo.png" alt="SDJ - Grupo Sou de Jesus" class="brand-logo" />
+        <div>
+          <h1>Bot-SDJ-Nivers</h1>
+          <p>Grupo Sou de Jesus</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Dashboard</a>
+        <a href="/aniversariantes" class="<%= currentPath.startsWith('/aniversariantes') ? 'active' : '' %>">Aniversariantes</a>
+        <a href="/templates" class="<%= currentPath.startsWith('/templates') ? 'active' : '' %>">Templates</a>
+        <a href="/logs" class="<%= currentPath.startsWith('/logs') ? 'active' : '' %>">Logs</a>
+        <a href="/auditoria" class="<%= currentPath.startsWith('/auditoria') ? 'active' : '' %>">Auditoria</a>
+        <a href="/grupos" class="<%= currentPath.startsWith('/grupos') ? 'active' : '' %>">Grupos (IDs)</a>
+      </nav>
+      <div class="sidebar-foot">
+        <div><strong>GROUP_ID</strong></div>
+        <code><%= config.groupIdMasked || 'Nao configurado' %></code>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <h2><%= pageTitle %></h2>
+        <div>
+          <p><%= config.panelProtected ? 'Painel protegido por autenticacao' : 'Painel sem autenticacao (somente dev)' %></p>
+          <% if (currentUser && currentUser.username) { %>
+            <div class="actions-row" style="justify-content:flex-end; margin-top:8px;">
+              <span class="hint">Usuario: <strong><%= currentUser.username %></strong></span>
+              <form method="post" action="/logout" style="margin:0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button type="submit" class="btn btn-sm btn-outline">Sair</button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+      </header>
+
+      <% if (flashOk) { %>
+        <div class="alert success"><%= flashOk %></div>
+      <% } %>
+      <% if (flashErr) { %>
+        <div class="alert error"><%= flashErr %></div>
+      <% } %>
