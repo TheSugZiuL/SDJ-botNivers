@@ -182,7 +182,8 @@ router.get("/", (req, res) => {
     whatsappStatus: whatsappService.getStatus(),
     activeTemplates: {
       birthdayToday: templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayToday),
-      birthdayReminder: templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminder),
+      birthdayReminderD5: templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminderD5),
+      birthdayReminderD3: templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminderD3),
       birthdayReminderD1: templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminderD1)
     },
     reminderPreview: birthdayService.previewUpcomingBirthdayReminders({ referenceDate: todayIso }),
@@ -418,7 +419,7 @@ router.post("/enviar-teste", async (req, res) => {
 router.post("/enviar-lembrete-teste", async (req, res) => {
   try {
     const nomeTeste = String(req.body.nome_teste || "Teste SDJ").trim();
-    const diasLembrete = Number(req.body.dias_lembrete || 7);
+    const diasLembrete = Number(req.body.dias_lembrete || 5);
     const result = await birthdayService.sendReminderTestMessage(nomeTeste, diasLembrete);
     if (!result.success) {
       writeAuditLog(req, "send.reminder_test_failed", "Falha ao enviar lembrete de teste", {

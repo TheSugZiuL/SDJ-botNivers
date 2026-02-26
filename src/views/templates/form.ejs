@@ -18,7 +18,8 @@
     <label for="tipo">Tipo do template *</label>
     <select id="tipo" name="tipo" required>
       <option value="birthday_today" <%= item.tipo === 'birthday_today' ? 'selected' : '' %>>Aniversario (dia atual)</option>
-      <option value="birthday_reminder" <%= item.tipo === 'birthday_reminder' ? 'selected' : '' %>>Lembrete antecipado</option>
+      <option value="birthday_reminder_d5" <%= item.tipo === 'birthday_reminder_d5' ? 'selected' : '' %>>Lembrete D-5</option>
+      <option value="birthday_reminder_d3" <%= item.tipo === 'birthday_reminder_d3' ? 'selected' : '' %>>Lembrete D-3</option>
       <option value="birthday_reminder_d1" <%= item.tipo === 'birthday_reminder_d1' ? 'selected' : '' %>>Lembrete D-1 (amanha)</option>
     </select>
 

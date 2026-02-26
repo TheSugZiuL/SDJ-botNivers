@@ -6,7 +6,7 @@ Bot local de WhatsApp para avisar aniversarios em grupo com painel web e SQLite.
 
 - O scheduler roda no horario de `CRON_SCHEDULE` (ex.: `0 8 * * *` = todos os dias as 08:00)
 - Resumo mensal automatico: somente no dia **01** de cada mes
-- Lembretes antecipados: enviados diariamente para os dias configurados em `REMINDER_DAYS_BEFORE` (padrao `7,3,1`)
+- Lembretes antecipados: enviados diariamente para os dias configurados em `REMINDER_DAYS_BEFORE` (padrao `5,3,1`)
 - Aniversario do dia: enviado no proprio dia
 - No painel, ha botoes para rodar apenas os lembretes manualmente (normal ou teste)
 
@@ -46,7 +46,7 @@ Defina no painel da Render:
 - `PANEL_LOGIN_LOCKOUT_SEC=1800`
 - `DB_PATH=/var/data/bot_sdj_nivers.db`
 - `WHATSAPP_AUTH_PATH=/var/data/whatsapp-auth`
-- `REMINDER_DAYS_BEFORE=7,3,1`
+- `REMINDER_DAYS_BEFORE=5,3,1`
 
 Opcional (mais restritivo):
 

@@ -3,6 +3,8 @@ const { getDb } = require("../db/database");
 const TEMPLATE_TYPES = {
   birthdayToday: "birthday_today",
   birthdayReminder: "birthday_reminder",
+  birthdayReminderD5: "birthday_reminder_d5",
+  birthdayReminderD3: "birthday_reminder_d3",
   birthdayReminderD1: "birthday_reminder_d1"
 };
 

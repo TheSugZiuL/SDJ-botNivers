@@ -77,7 +77,7 @@
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <label for="dias_lembrete">Dias antes</label>
       <select id="dias_lembrete" name="dias_lembrete">
-        <% (config.reminderDaysBefore || [7,3,1]).forEach(function(d) { %>
+        <% (config.reminderDaysBefore || [5,3,1]).forEach(function(d) { %>
           <option value="<%= d %>"><%= d %> dias</option>
         <% }) %>
       </select>
@@ -85,7 +85,7 @@
       <input id="nome_teste_lembrete" name="nome_teste" type="text" value="Teste SDJ" maxlength="80" />
       <button type="submit" class="btn btn-outline">Enviar lembrete de teste</button>
     </form>
-    <div class="actions-row" style="margin-top:10px;">
+    <div class="actions-row actions-row-top">
       <form method="post" action="/enviar-lembrete-proximo-teste">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" class="btn btn-outline">Teste do proximo aniversariante</button>
@@ -105,11 +105,15 @@
     <% if (activeTemplates.birthdayToday) { %>
       <pre class="template-preview"><%= activeTemplates.birthdayToday.conteudo %></pre>
     <% } %>
-    <p class="hint"><strong>Lembrete:</strong> <%= activeTemplates.birthdayReminder ? activeTemplates.birthdayReminder.nome : 'Nenhum' %></p>
-    <% if (activeTemplates.birthdayReminder) { %>
-      <pre class="template-preview"><%= activeTemplates.birthdayReminder.conteudo %></pre>
+    <p class="hint"><strong>Lembrete D-5:</strong> <%= activeTemplates.birthdayReminderD5 ? activeTemplates.birthdayReminderD5.nome : 'Nenhum' %></p>
+    <% if (activeTemplates.birthdayReminderD5) { %>
+      <pre class="template-preview"><%= activeTemplates.birthdayReminderD5.conteudo %></pre>
     <% } %>
-    <p class="hint"><strong>Lembrete D-1:</strong> <%= activeTemplates.birthdayReminderD1 ? activeTemplates.birthdayReminderD1.nome : 'Nenhum (usa template de lembrete)' %></p>
+    <p class="hint"><strong>Lembrete D-3:</strong> <%= activeTemplates.birthdayReminderD3 ? activeTemplates.birthdayReminderD3.nome : 'Nenhum' %></p>
+    <% if (activeTemplates.birthdayReminderD3) { %>
+      <pre class="template-preview"><%= activeTemplates.birthdayReminderD3.conteudo %></pre>
+    <% } %>
+    <p class="hint"><strong>Lembrete D-1:</strong> <%= activeTemplates.birthdayReminderD1 ? activeTemplates.birthdayReminderD1.nome : 'Nenhum' %></p>
     <% if (activeTemplates.birthdayReminderD1) { %>
       <pre class="template-preview"><%= activeTemplates.birthdayReminderD1.conteudo %></pre>
     <% } %>

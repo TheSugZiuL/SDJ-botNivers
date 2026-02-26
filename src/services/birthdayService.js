@@ -84,7 +84,20 @@ function getActiveReminderTemplate() {
 }
 
 function getActiveReminderTemplateForDays(daysBefore) {
-  if (Number(daysBefore) === 1) {
+  const days = Number(daysBefore);
+  if (days === 5) {
+    return (
+      templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminderD5) ||
+      getActiveReminderTemplate()
+    );
+  }
+  if (days === 3) {
+    return (
+      templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminderD3) ||
+      getActiveReminderTemplate()
+    );
+  }
+  if (days === 1) {
     return (
       templateRepository.getActive(templateRepository.TEMPLATE_TYPES.birthdayReminderD1) ||
       getActiveReminderTemplate()
@@ -350,13 +363,13 @@ async function sendManualTestMessage(nome) {
   return sendBirthdayMessage(fakePerson, { referenceDate: currentDateIso(), ignoreDuplicate: true });
 }
 
-async function sendReminderTestMessage(nome, daysBefore = 7) {
+async function sendReminderTestMessage(nome, daysBefore = 5) {
   const fakePerson = {
     id: null,
     nome: nome || "Teste SDJ",
     data_aniversario: "2000-01-01"
   };
-  return sendReminderMessage(fakePerson, Number(daysBefore) || 7, {
+  return sendReminderMessage(fakePerson, Number(daysBefore) || 5, {
     referenceDate: currentDateIso(),
     ignoreDuplicate: true
   });

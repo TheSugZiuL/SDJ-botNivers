@@ -10,7 +10,7 @@ function parseBoolean(value, defaultValue = false) {
 
 const nodeEnv = (process.env.NODE_ENV || "development").trim();
 const isProduction = nodeEnv === "production";
-const reminderDaysBefore = String(process.env.REMINDER_DAYS_BEFORE || "7,3,1")
+const reminderDaysBefore = String(process.env.REMINDER_DAYS_BEFORE || "5,3,1")
   .split(",")
   .map((value) => Number(String(value).trim()))
   .filter((value) => Number.isInteger(value) && value > 0)

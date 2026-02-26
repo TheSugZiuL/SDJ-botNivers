@@ -32,13 +32,15 @@
 
     <main class="content">
       <header class="topbar">
-        <h2><%= pageTitle %></h2>
-        <div>
+        <div class="topbar-main">
+          <h2><%= pageTitle %></h2>
           <p><%= config.panelProtected ? 'Painel protegido por autenticacao' : 'Painel sem autenticacao (somente dev)' %></p>
+        </div>
+        <div class="topbar-meta">
           <% if (currentUser && currentUser.username) { %>
-            <div class="actions-row" style="justify-content:flex-end; margin-top:8px;">
+            <div class="actions-row user-row">
               <span class="hint">Usuario: <strong><%= currentUser.username %></strong></span>
-              <form method="post" action="/logout" style="margin:0;">
+              <form method="post" action="/logout">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 <button type="submit" class="btn btn-sm btn-outline">Sair</button>
               </form>
