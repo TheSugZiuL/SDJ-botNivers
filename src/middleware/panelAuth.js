@@ -13,7 +13,11 @@ function parseCookies(headerValue) {
     const key = part.slice(0, idx).trim();
     const value = part.slice(idx + 1).trim();
     if (!key) continue;
-    cookies[key] = decodeURIComponent(value);
+    try {
+      cookies[key] = decodeURIComponent(value);
+    } catch {
+      cookies[key] = value;
+    }
   }
   return cookies;
 }
@@ -85,7 +89,13 @@ function createPanelAuth(config) {
   const loginFailureWindowSec = Math.max(60, Number(config.panelLoginFailureWindowSec || 900));
   const loginLockoutSec = Math.max(60, Number(config.panelLoginLockoutSec || 1_800));
   const cookieSecure = Boolean(config.isProduction);
-  const sessionSecret = config.panelSessionSecret || "dev-session-secret";
+  const sessionSecret =
+    (typeof config.panelSessionSecret === "string" && config.panelSessionSecret.trim()) ||
+    crypto.randomBytes(32).toString("hex");
+
+  if (!config.isProduction && (!config.panelSessionSecret || String(config.panelSessionSecret).length < 32)) {
+    console.warn("[SECURITY] PANEL_SESSION_SECRET nao definido/curto em dev. Usando segredo efemero por boot.");
+  }
 
   function credentialsMatch(username, password) {
     return (

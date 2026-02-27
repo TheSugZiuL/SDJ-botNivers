@@ -18,7 +18,11 @@ function parseCookies(headerValue) {
     const key = part.slice(0, idx).trim();
     const value = part.slice(idx + 1).trim();
     if (!key) continue;
-    cookies[key] = decodeURIComponent(value);
+    try {
+      cookies[key] = decodeURIComponent(value);
+    } catch {
+      cookies[key] = value;
+    }
   }
   return cookies;
 }

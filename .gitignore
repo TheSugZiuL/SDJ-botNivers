@@ -1,7 +1,11 @@
 node_modules/
 .env
+.env.*
+!.env.example
 .wwebjs_auth/
 .wwebjs_cache/
-data/whatsapp-auth/
-data/*.db
+data/
 npm-debug.log*
+*.sqlite
+*.db-shm
+*.db-wal

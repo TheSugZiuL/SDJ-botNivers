@@ -106,7 +106,7 @@ class WhatsAppService {
     try {
       chat = await this.client.getChatById(groupId);
     } catch (error) {
-      throw new Error(`Grupo nao encontrado para GROUP_ID: ${groupId}`);
+      throw new Error("Grupo nao encontrado para o GROUP_ID configurado.");
     }
 
     if (!chat || !chat.isGroup) {
