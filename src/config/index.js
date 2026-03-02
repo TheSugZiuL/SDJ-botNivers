@@ -36,9 +36,8 @@ module.exports = {
   dbPath: path.resolve(process.cwd(), process.env.DB_PATH || "./data/bot_sdj_nivers.db"),
   whatsappSessionName: (process.env.WHATSAPP_SESSION_NAME || "bot-sdj-nivers").trim(),
   whatsappAuthPath: path.resolve(process.cwd(), process.env.WHATSAPP_AUTH_PATH || "./data/whatsapp-auth"),
-  whatsappAutoReconnect: parseBoolean(process.env.WHATSAPP_AUTO_RECONNECT, true),
-  whatsappReconnectDelayMs: Math.max(1000, Number(process.env.WHATSAPP_RECONNECT_DELAY_MS || 15000)),
-  whatsappMaxReconnectAttempts: Math.max(0, Number(process.env.WHATSAPP_MAX_RECONNECT_ATTEMPTS || 0)),
+  whatsappLazyStart: parseBoolean(process.env.WHATSAPP_LAZY_START, isProduction),
+  whatsappIdleShutdownMs: Math.max(0, Number(process.env.WHATSAPP_IDLE_SHUTDOWN_MS || 10 * 60 * 1000)),
   whatsappPuppeteerArgs:
     parseCsv(process.env.WHATSAPP_PUPPETEER_ARGS).length > 0
       ? parseCsv(process.env.WHATSAPP_PUPPETEER_ARGS)
@@ -47,11 +46,15 @@ module.exports = {
           "--disable-setuid-sandbox",
           "--disable-dev-shm-usage",
           "--disable-gpu",
+          "--disable-software-rasterizer",
           "--no-zygote",
+          "--single-process",
+          "--renderer-process-limit=1",
           "--no-first-run",
           "--disable-extensions",
           "--disable-background-networking",
-          "--disable-default-apps"
+          "--disable-default-apps",
+          "--mute-audio"
         ],
   trustProxy: Number(process.env.TRUST_PROXY || (isProduction ? 1 : 0)),
   requireHttps: parseBoolean(process.env.REQUIRE_HTTPS, isProduction),

@@ -36,9 +36,13 @@ app.use((err, req, res, next) => {
 });
 
 function startBackgroundServices() {
-  whatsappService.initialize().catch((error) => {
-    console.error("[WhatsApp] Falha ao iniciar:", error.message);
-  });
+  if (config.whatsappLazyStart) {
+    console.log("[WhatsApp] Modo lazy habilitado. Cliente sera iniciado sob demanda.");
+  } else {
+    whatsappService.initialize().catch((error) => {
+      console.error("[WhatsApp] Falha ao iniciar:", error.message);
+    });
+  }
   startBirthdayScheduler();
 }
 
