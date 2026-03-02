@@ -8,6 +8,14 @@ function parseBoolean(value, defaultValue = false) {
   return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
 }
 
+function parseCsv(value) {
+  if (value == null || value === "") return [];
+  return String(value)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 const nodeEnv = (process.env.NODE_ENV || "development").trim();
 const isProduction = nodeEnv === "production";
 const reminderDaysBefore = String(process.env.REMINDER_DAYS_BEFORE || "5,3,1")
@@ -28,6 +36,23 @@ module.exports = {
   dbPath: path.resolve(process.cwd(), process.env.DB_PATH || "./data/bot_sdj_nivers.db"),
   whatsappSessionName: (process.env.WHATSAPP_SESSION_NAME || "bot-sdj-nivers").trim(),
   whatsappAuthPath: path.resolve(process.cwd(), process.env.WHATSAPP_AUTH_PATH || "./data/whatsapp-auth"),
+  whatsappAutoReconnect: parseBoolean(process.env.WHATSAPP_AUTO_RECONNECT, true),
+  whatsappReconnectDelayMs: Math.max(1000, Number(process.env.WHATSAPP_RECONNECT_DELAY_MS || 15000)),
+  whatsappMaxReconnectAttempts: Math.max(0, Number(process.env.WHATSAPP_MAX_RECONNECT_ATTEMPTS || 0)),
+  whatsappPuppeteerArgs:
+    parseCsv(process.env.WHATSAPP_PUPPETEER_ARGS).length > 0
+      ? parseCsv(process.env.WHATSAPP_PUPPETEER_ARGS)
+      : [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--no-zygote",
+          "--no-first-run",
+          "--disable-extensions",
+          "--disable-background-networking",
+          "--disable-default-apps"
+        ],
   trustProxy: Number(process.env.TRUST_PROXY || (isProduction ? 1 : 0)),
   requireHttps: parseBoolean(process.env.REQUIRE_HTTPS, isProduction),
   csrfCheckOrigin: parseBoolean(process.env.CSRF_CHECK_ORIGIN, isProduction),

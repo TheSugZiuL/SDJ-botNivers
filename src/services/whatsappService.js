@@ -12,23 +12,24 @@ class WhatsAppService {
     this.lastQrAt = null;
     this.lastError = null;
     this.initialized = false;
+    this.initPromise = null;
+    this.reconnectTimer = null;
+    this.reconnectAttempts = 0;
   }
 
-  initialize() {
-    if (this.initialized) return Promise.resolve(this.client);
-
+  createClient() {
     fs.mkdirSync(config.whatsappAuthPath, { recursive: true });
     console.log(`[WhatsApp] Pasta de sessao: ${config.whatsappAuthPath}`);
 
-    this.client = new Client({
+    const client = new Client({
       authStrategy: new LocalAuth({
         clientId: config.whatsappSessionName,
         dataPath: config.whatsappAuthPath
       }),
-      puppeteer: { headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] }
+      puppeteer: { headless: true, args: config.whatsappPuppeteerArgs }
     });
 
-    this.client.on("qr", (qr) => {
+    client.on("qr", (qr) => {
       this.state = "qr_pending";
       this.lastQr = qr;
       this.lastQrAt = new Date().toISOString();
@@ -40,41 +41,100 @@ class WhatsAppService {
       });
     });
 
-    this.client.on("authenticated", () => {
+    client.on("authenticated", () => {
       this.state = "authenticated";
       this.lastQr = null;
       this.lastQrAscii = null;
       this.lastQrAt = null;
+      this.reconnectAttempts = 0;
       console.log("[WhatsApp] Sessao autenticada.");
     });
 
-    this.client.on("ready", () => {
+    client.on("ready", () => {
       this.state = "ready";
       this.lastError = null;
       this.lastQr = null;
       this.lastQrAscii = null;
       this.lastQrAt = null;
+      this.reconnectAttempts = 0;
       console.log("[WhatsApp] Cliente conectado e pronto.");
     });
 
-    this.client.on("auth_failure", (msg) => {
+    client.on("auth_failure", (msg) => {
       this.state = "auth_failure";
       this.lastError = msg || "Falha de autenticacao";
       console.error("[WhatsApp] auth_failure:", msg);
+      this.scheduleReconnect("auth_failure");
     });
 
-    this.client.on("disconnected", (reason) => {
+    client.on("disconnected", (reason) => {
       this.state = "disconnected";
       this.lastError = reason || "Desconectado";
       console.warn("[WhatsApp] disconnected:", reason);
+      this.scheduleReconnect("disconnected");
     });
 
-    this.client.on("change_state", (newState) => {
+    client.on("change_state", (newState) => {
       this.state = `state:${newState}`;
     });
 
-    this.initialized = true;
-    return this.client.initialize().then(() => this.client);
+    return client;
+  }
+
+  scheduleReconnect(trigger) {
+    if (!config.whatsappAutoReconnect) return;
+    if (this.reconnectTimer) return;
+
+    const max = Number(config.whatsappMaxReconnectAttempts || 0);
+    if (max > 0 && this.reconnectAttempts >= max) {
+      console.error("[WhatsApp] Limite de reconexao atingido.");
+      return;
+    }
+
+    const delay = Number(config.whatsappReconnectDelayMs || 15000);
+    this.reconnectAttempts += 1;
+    this.state = "reconnecting";
+    console.warn(`[WhatsApp] Reconexao agendada em ${delay}ms (motivo: ${trigger}). Tentativa ${this.reconnectAttempts}.`);
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.initialize(true).catch((error) => {
+        this.lastError = error.message || "Falha na reconexao";
+        this.scheduleReconnect("reconnect_error");
+      });
+    }, delay);
+  }
+
+  async initialize(force = false) {
+    if (this.initialized && this.client && !force) return this.client;
+    if (this.initPromise && !force) return this.initPromise;
+
+    if (force && this.client) {
+      await this.client.destroy().catch(() => null);
+      this.client = null;
+      this.initialized = false;
+    }
+
+    this.state = "initializing";
+    this.lastError = null;
+    this.client = this.createClient();
+
+    this.initPromise = this.client
+      .initialize()
+      .then(() => {
+        this.initialized = true;
+        return this.client;
+      })
+      .catch((error) => {
+        this.initialized = false;
+        this.lastError = error.message || "Falha ao inicializar WhatsApp";
+        this.scheduleReconnect("initialize_error");
+        throw error;
+      })
+      .finally(() => {
+        this.initPromise = null;
+      });
+
+    return this.initPromise;
   }
 
   getStatus() {

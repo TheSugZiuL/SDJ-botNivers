@@ -16,6 +16,8 @@ services:
         value: production
       - key: PORT
         value: "10000"
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
       - key: TRUST_PROXY
         value: "1"
       - key: REQUIRE_HTTPS
@@ -26,6 +28,12 @@ services:
         value: /var/data/bot_sdj_nivers.db
       - key: WHATSAPP_AUTH_PATH
         value: /var/data/whatsapp-auth
+      - key: WHATSAPP_AUTO_RECONNECT
+        value: "true"
+      - key: WHATSAPP_RECONNECT_DELAY_MS
+        value: "15000"
+      - key: WHATSAPP_MAX_RECONNECT_ATTEMPTS
+        value: "0"
       - key: PANEL_BASIC_AUTH_ENABLED
         value: "true"
       - key: PANEL_LOGIN_USER
