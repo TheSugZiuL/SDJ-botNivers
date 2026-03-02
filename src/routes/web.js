@@ -171,6 +171,15 @@ router.use((req, res, next) => {
 });
 
 router.get("/", (req, res) => {
+  if (config.whatsappLazyStart) {
+    const status = whatsappService.getStatus();
+    if (!status.initialized) {
+      whatsappService.initialize().catch((error) => {
+        console.error("[WhatsApp] Falha ao iniciar (lazy/dashboard):", error.message);
+      });
+    }
+  }
+
   const todayIso = nowTz(config.timezone).format("YYYY-MM-DD");
   res.render("dashboard", {
     pageTitle: "Dashboard",

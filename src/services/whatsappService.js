@@ -13,8 +13,25 @@ class WhatsAppService {
     this.lastError = null;
     this.initialized = false;
     this.initPromise = null;
-    this.reconnectTimer = null;
-    this.reconnectAttempts = 0;
+    this.idleTimer = null;
+  }
+
+  clearIdleTimer() {
+    if (!this.idleTimer) return;
+    clearTimeout(this.idleTimer);
+    this.idleTimer = null;
+  }
+
+  scheduleIdleShutdown() {
+    this.clearIdleTimer();
+    const idleMs = Number(config.whatsappIdleShutdownMs || 0);
+    if (idleMs <= 0 || !this.initialized || !this.client) return;
+    this.idleTimer = setTimeout(() => {
+      this.shutdown("idle_timeout").catch((error) => {
+        console.error("[WhatsApp] Falha ao encerrar cliente ocioso:", error.message);
+      });
+    }, idleMs);
+    if (typeof this.idleTimer.unref === "function") this.idleTimer.unref();
   }
 
   createClient() {
@@ -46,7 +63,6 @@ class WhatsAppService {
       this.lastQr = null;
       this.lastQrAscii = null;
       this.lastQrAt = null;
-      this.reconnectAttempts = 0;
       console.log("[WhatsApp] Sessao autenticada.");
     });
 
@@ -56,22 +72,20 @@ class WhatsAppService {
       this.lastQr = null;
       this.lastQrAscii = null;
       this.lastQrAt = null;
-      this.reconnectAttempts = 0;
       console.log("[WhatsApp] Cliente conectado e pronto.");
+      this.scheduleIdleShutdown();
     });
 
     client.on("auth_failure", (msg) => {
       this.state = "auth_failure";
       this.lastError = msg || "Falha de autenticacao";
       console.error("[WhatsApp] auth_failure:", msg);
-      this.scheduleReconnect("auth_failure");
     });
 
     client.on("disconnected", (reason) => {
       this.state = "disconnected";
       this.lastError = reason || "Desconectado";
       console.warn("[WhatsApp] disconnected:", reason);
-      this.scheduleReconnect("disconnected");
     });
 
     client.on("change_state", (newState) => {
@@ -81,38 +95,9 @@ class WhatsAppService {
     return client;
   }
 
-  scheduleReconnect(trigger) {
-    if (!config.whatsappAutoReconnect) return;
-    if (this.reconnectTimer) return;
-
-    const max = Number(config.whatsappMaxReconnectAttempts || 0);
-    if (max > 0 && this.reconnectAttempts >= max) {
-      console.error("[WhatsApp] Limite de reconexao atingido.");
-      return;
-    }
-
-    const delay = Number(config.whatsappReconnectDelayMs || 15000);
-    this.reconnectAttempts += 1;
-    this.state = "reconnecting";
-    console.warn(`[WhatsApp] Reconexao agendada em ${delay}ms (motivo: ${trigger}). Tentativa ${this.reconnectAttempts}.`);
-    this.reconnectTimer = setTimeout(() => {
-      this.reconnectTimer = null;
-      this.initialize(true).catch((error) => {
-        this.lastError = error.message || "Falha na reconexao";
-        this.scheduleReconnect("reconnect_error");
-      });
-    }, delay);
-  }
-
-  async initialize(force = false) {
-    if (this.initialized && this.client && !force) return this.client;
-    if (this.initPromise && !force) return this.initPromise;
-
-    if (force && this.client) {
-      await this.client.destroy().catch(() => null);
-      this.client = null;
-      this.initialized = false;
-    }
+  async initialize() {
+    if (this.initialized && this.client) return this.client;
+    if (this.initPromise) return this.initPromise;
 
     this.state = "initializing";
     this.lastError = null;
@@ -127,7 +112,7 @@ class WhatsAppService {
       .catch((error) => {
         this.initialized = false;
         this.lastError = error.message || "Falha ao inicializar WhatsApp";
-        this.scheduleReconnect("initialize_error");
+        this.client = null;
         throw error;
       })
       .finally(() => {
@@ -135,6 +120,22 @@ class WhatsAppService {
       });
 
     return this.initPromise;
+  }
+
+  async shutdown(reason = "manual") {
+    this.clearIdleTimer();
+    if (!this.client) {
+      this.initialized = false;
+      this.state = "not_initialized";
+      return;
+    }
+    await this.client.destroy().catch(() => null);
+    this.client = null;
+    this.initialized = false;
+    this.state = `stopped:${reason}`;
+    this.lastQr = null;
+    this.lastQrAscii = null;
+    this.lastQrAt = null;
   }
 
   getStatus() {
@@ -149,13 +150,12 @@ class WhatsAppService {
   }
 
   async assertReady() {
-    if (!this.initialized || !this.client) {
-      throw new Error("WhatsApp ainda nao foi inicializado.");
-    }
+    if (!this.initialized || !this.client) await this.initialize();
     const state = await this.client.getState().catch(() => null);
     if (this.state !== "ready" && state !== "CONNECTED") {
       throw new Error("WhatsApp nao esta pronto. Escaneie o QR Code e aguarde conectar.");
     }
+    this.scheduleIdleShutdown();
   }
 
   async sendMessageToGroup(groupId, message) {
@@ -174,6 +174,7 @@ class WhatsAppService {
     }
 
     await chat.sendMessage(message);
+    this.scheduleIdleShutdown();
     return { ok: true, groupName: chat.name };
   }
 
@@ -181,10 +182,12 @@ class WhatsAppService {
     await this.assertReady();
     const chats = await this.client.getChats();
     const safeName = (value) => (typeof value === "string" ? value : "");
-    return chats
+    const groups = chats
       .filter((c) => c.isGroup)
       .map((c) => ({ id: c.id?._serialized, nome: safeName(c.name) }))
       .sort((a, b) => safeName(a.nome).localeCompare(safeName(b.nome), "pt-BR"));
+    this.scheduleIdleShutdown();
+    return groups;
   }
 }
 
